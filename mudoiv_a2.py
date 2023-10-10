@@ -9,7 +9,7 @@ def parseConfigFile(filename):
                     config_dict['codonProfile'] = value
                 elif key == 'GeneExpFileName':
                     config_dict['GeneExpFileName'] = value
-                elif key == 'translation6Frame[Y|N]':
+                elif key == 'translation6Frames[Y|N]':
                     config_dict['translation6Frame'] = value
                 elif key == 'geneExp[Y|N]':
                     config_dict['geneExp'] = value
@@ -178,25 +178,6 @@ def processInquiry(config, sequences):
         print("|" * (end_position - start_position + 2))
         print(selected_fragment)
 
-        # print nucleotide counts
-        count = nucleotideCounter(selected_fragment)
-        print(f"Nucleotide Counts: Seq Length={count[0]} A={count[1]} T={count[2]} G={count[3]} C={count[4]} N={count[5]}")
-
-        # print gc content
-        print(f"GC Content={gcContent(selected_fragment)}%")
-
-        # print dinucleotide profile
-        print(f"Dinucleotide profile: {diNucleotideProfile(selected_fragment)}")
-
-        # print cpG islands
-        print(f"CpG Islands: {CpGIsland(selected_fragment)}")
-
-        if config['codonProfile'] == 'Y':
-            codon_counts = codonProfile(selected_fragment)
-            print('Codon Profile:')
-            codonProfilePrint(codon_counts)
-            print()
-
         if config['translation6Frame'] == 'Y':
             translations = translation6Frame(selected_fragment)
             print("6-Frame Translations:")
@@ -328,6 +309,12 @@ if __name__ == '__main__':
         #  print cpg islants
         if config["CpGIsland[Y|N]"] == 'Y':
             print(f"CpG Islands: {CpGIsland(sequence)}")
+
+        if config['codonProfile'] == 'Y':
+            codon_counts = codonProfile(sequence)
+            print('Codon Profile:')
+            codonProfilePrint(codon_counts)
+            print()
 
         print()
 
