@@ -255,6 +255,13 @@ if __name__ == '__main__':
         if config["CpGIsland[Y|N]"] == 'Y':
             print(f"CpG Islands: {CpGIsland(sequence)}")
 
+        # print codon profile
+        if config['codonProfile'] == 'Y':
+            codon_counts = codonProfile(sequence)
+            print('Codon Profile:')
+            codonProfilePrint(codon_counts)
+            print()
+
         print()
 
     processInquiry(config, sequences)
