@@ -3,20 +3,21 @@ def parseConfigFile(filename):
     with open(filename, 'r') as file:
         for line in file:
             line = line.strip()
-            if not line.startswith('#') and '=' in line:
+            if "=" in line:
                 key, value = line.split('=')
-                config_dict[key] = value
-
-    if 'GeneExpFileName' not in config_dict:
-        config_dict['GeneExpFileName'] = ''
-    if 'codonProfile' not in config_dict:
-        config_dict['codonProfile'] = 'N'
-    if 'translation6Frame' not in config_dict:
-        config_dict['translation6Frame'] = 'N'
-    if 'geneExp' not in config_dict:
-        config_dict['geneExp'] = 'N'
-
+                if key == 'codonProfile[Y|N]':
+                    config_dict['codonProfile'] = value
+                elif key == 'GeneExpFileName':
+                    config_dict['GeneExpFileName'] = value
+                elif key == 'translation6Frame[Y|N]':
+                    config_dict['translation6Frame'] = value
+                elif key == 'geneExp[Y|N]':
+                    config_dict['geneExp'] = value
+                else:
+                    config_dict[key] = value
     return config_dict
+
+
 
 def readFASTA(filename):
     sequences = []
@@ -190,6 +191,12 @@ def processInquiry(config, sequences):
         # print cpG islands
         print(f"CpG Islands: {CpGIsland(selected_fragment)}")
 
+        if config['codonProfile'] == 'Y':
+            codon_counts = codonProfile(selected_fragment)
+            print('Codon Profile:')
+            codonProfilePrint(codon_counts)
+            print()
+
         print()
 
 def codonProfile(sequence):
@@ -209,7 +216,7 @@ def codonProfile(sequence):
 def codonProfilePrint(codon_counts):
     nucleotides = ['T', 'C', 'A', 'G']
 
-    print("Codon Profile:")
+
     print("       2nd")
     print("       -------------------------------")
     print("1st", end='  ')
@@ -265,13 +272,6 @@ if __name__ == '__main__':
         #  print cpg islants
         if config["CpGIsland[Y|N]"] == 'Y':
             print(f"CpG Islands: {CpGIsland(sequence)}")
-
-        # print codon profile
-        if config['codonProfile'] == 'Y':
-            codon_counts = codonProfile(sequence)
-            print('Codon Profile:')
-            codonProfilePrint(codon_counts)
-            print()
 
         print()
 
