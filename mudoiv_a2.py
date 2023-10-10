@@ -170,13 +170,20 @@ def processInquiry(config, sequences):
         # get the fragment
         selected_fragment = sequence[start_position - 1:end_position]
 
-        print(f">{seq_name} {description}\n")
+        printSeqFragment(seq_name, description, selected_fragment, start_position, end_position)
 
-        # print the fragment with ruler
-        ruler = f"<{start_position}{'-' * (end_position - start_position + 1)}{end_position}>"
-        print(ruler)
-        print("|" * (end_position - start_position + 2))
-        print(selected_fragment)
+        count = nucleotideCounter(sequence)
+        print(
+            f"Nucleotide Counts: Seq Length={count[0]} A={count[1]} T={count[2]} G={count[3]} C={count[4]} N={count[5]}")
+
+        # print gc content
+        print(f"GC content={gcContent(sequence)}%")
+
+        # print dinucleotide profile
+        print(f"Dinucleotide profile: {diNucleotideProfile(sequence)}")
+
+        # print cpg islands
+        print(f"CpG Islands: {CpGIsland(sequence)}")
 
         if config['translation6Frame'] == 'Y':
             translations = translation6Frame(selected_fragment)
