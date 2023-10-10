@@ -197,6 +197,15 @@ def processInquiry(config, sequences):
             codonProfilePrint(codon_counts)
             print()
 
+        if config['translation6Frame'] == 'Y':
+            translations = translation6Frame(selected_fragment)
+            print("6-Frame Translations:")
+            for i, trans in enumerate(translations, 1):
+                direction = "Forward" if i <= 3 else "Reverse"
+                frame = i if i <= 3 else i - 3
+                print(f"{direction} Frame {frame}: {trans}")
+            print()
+
         print()
 
 def codonProfile(sequence):
@@ -232,6 +241,53 @@ def codonProfilePrint(codon_counts):
                 print(f'{codon}={codon_counts[codon]:>3}', end=' ')
             print(' ' + third)
         print()
+
+CODON_TABLE = {
+    'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
+    'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
+    'AAC': 'N', 'AAT': 'N', 'AAA': 'K', 'AAG': 'K',
+    'AGC': 'S', 'AGT': 'S', 'AGA': 'R', 'AGG': 'R',
+    'CTA': 'L', 'CTC': 'L', 'CTG': 'L', 'CTT': 'L',
+    'CCA': 'P', 'CCC': 'P', 'CCG': 'P', 'CCT': 'P',
+    'CAC': 'H', 'CAT': 'H', 'CAA': 'Q', 'CAG': 'Q',
+    'CGA': 'R', 'CGC': 'R', 'CGG': 'R', 'CGT': 'R',
+    'GTA': 'V', 'GTC': 'V', 'GTG': 'V', 'GTT': 'V',
+    'GCA': 'A', 'GCC': 'A', 'GCG': 'A', 'GCT': 'A',
+    'GAC': 'D', 'GAT': 'D', 'GAA': 'E', 'GAG': 'E',
+    'GGA': 'G', 'GGC': 'G', 'GGG': 'G', 'GGT': 'G',
+    'TCA': 'S', 'TCC': 'S', 'TCG': 'S', 'TCT': 'S',
+    'TTC': 'F', 'TTT': 'F', 'TTA': 'L', 'TTG': 'L',
+    'TAC': 'Y', 'TAT': 'Y', 'TAA': '_', 'TAG': '_',
+    'TGC': 'C', 'TGT': 'C', 'TGA': '_', 'TGG': 'W',
+}
+
+def translation(dna_seq):
+    protein = ""
+    for i in range(0, len(dna_seq), 3):
+        codon = dna_seq[i:i+3]
+        protein += CODON_TABLE.get(codon, 'X')  # X for unknown codon
+    return protein
+
+def reverse_complement(dna_seq):
+    complement = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
+    return ''.join(complement[base] for base in reversed(dna_seq))
+
+def translation6Frame(dna_seq):
+    frames = []
+
+    # 3 forward frames
+    for i in range(3):
+        frames.append(translation(dna_seq[i:]))
+
+    # Get reverse complement for reverse frames
+    rev_seq = reverse_complement(dna_seq)
+
+    # 3 reverse frames
+    for i in range(3):
+        frames.append(translation(rev_seq[i:]))
+
+    return tuple(frames)
+
 
 if __name__ == '__main__':
     import sys
