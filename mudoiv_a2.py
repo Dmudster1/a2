@@ -270,6 +270,26 @@ def translation6Frame(dna_seq):
     return tuple(frames)
 
 
+def printSeqFragment(seq_name, description, seq_fragment, start, end):
+    # Print sequence name and description
+    print(f'>{seq_name} {description}')
+
+    # Print the length of the selected fragment
+    fragment_length = len(seq_fragment)
+    print(f'The selected fragment has a length of {fragment_length} nucleotides:')
+
+    # Format the ruler to show the start and end positions
+    ruler = f'<{start}' + '-' * (fragment_length - len(str(start)) - len(str(end))) + f'{end}>'
+    print(ruler)
+
+    # Display the sequence fragment with ellipsis in the middle if too long
+    if fragment_length > 40:
+        print(seq_fragment[:20] + '...' + seq_fragment[-20:])
+    else:
+        print(seq_fragment)
+
+    print()
+
 if __name__ == '__main__':
     import sys
 
@@ -283,8 +303,8 @@ if __name__ == '__main__':
 
     for seq_name, description, sequence in sequences:
         # loop through all sequences
-        if config["ViewSequenceInFastaFormat[Y|N]"] == 'N': # print based on ruler needed
-            if config["DoYouNeedSpaceSeperator[Y|N]"] == 'Y': # print based on spacer needed
+        if config["ViewSequenceInFastaFormat[Y|N]"] == 'N':  # print based on ruler needed
+            if config["DoYouNeedSpaceSeperator[Y|N]"] == 'Y':  # print based on spacer needed
                 spacer = ' '
             else:
                 spacer = ''
@@ -293,22 +313,17 @@ if __name__ == '__main__':
             printInFASTA(seq_name, sequence, description, NucleotidesPerLine)
 
         # print nucleotide count
-        if config["nucleotideCounter[Y|N]"] == 'Y':
-            count = nucleotideCounter(sequence)
-            print(
-                f"Nucleotide Counts: Seq Length={count[0]} A={count[1]} T={count[2]} G={count[3]} C={count[4]} N={count[5]}")
+        count = nucleotideCounter(sequence)
+        print(f"Nucleotide Counts: Seq Length={count[0]} A={count[1]} T={count[2]} G={count[3]} C={count[4]} N={count[5]}")
 
         # print gc content
-        if config["gcContent[Y|N]"] == 'Y':
-            print(f"GC content={gcContent(sequence)}%")
+        print(f"GC content={gcContent(sequence)}%")
 
         # print dinucleotide profile
-        if config["dinucleotideProfil[Y|N]"] == 'Y':
-            print(f"Dinucleotide profile: {diNucleotideProfile(sequence)}")
+        print(f"Dinucleotide profile: {diNucleotideProfile(sequence)}")
 
-        #  print cpg islants
-        if config["CpGIsland[Y|N]"] == 'Y':
-            print(f"CpG Islands: {CpGIsland(sequence)}")
+        # print cpg islands
+        print(f"CpG Islands: {CpGIsland(sequence)}")
 
         if config['codonProfile'] == 'Y':
             codon_counts = codonProfile(sequence)
