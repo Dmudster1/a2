@@ -193,27 +193,38 @@ def processInquiry(config, sequences):
         print()
 
 def codonProfile(sequence):
-    sequence = sequence[:len(sequence) - len(sequence) % 3]
-    codon_counts = {}
-    for i in range(0, len(sequence), 3):
-        codon = sequence[i:i+3]
-        codon_counts[codon] = codon_counts.get(codon, 0) + 1
-    return codon_counts
+    # Initialize a dictionary with 64 codons as keys and values set to 0
+    nucleotides = ['A', 'T', 'C', 'G']
+    codon_dict = {first + second + third: 0 for first in nucleotides for second in nucleotides for third in nucleotides}
+
+    # Iterate through the sequence in steps of 3 and update the dictionary
+    for i in range(0, len(sequence) - 2, 3):
+        codon = sequence[i:i + 3]
+        if codon in codon_dict:
+            codon_dict[codon] += 1
+
+    return codon_dict
+
 
 def codonProfilePrint(codon_counts):
-    bases = ['T', 'C', 'A', 'G']
-    print('       2nd')
-    print('       -------------------------------')
-    print('1st    T       C       A       G     3rd')
-    for first_base in bases:
-        for third_base in bases:
-            line = first_base + '  '
-            for second_base in bases:
-                codon = first_base + second_base + third_base
-                count = codon_counts.get(codon, 0)
-                line += '{:<7}'.format(codon + '=' + str(count))
-            line += '  ' + third_base
-            print(line)
+    nucleotides = ['T', 'C', 'A', 'G']
+
+    print("Codon Profile:")
+    print("       2nd")
+    print("       -------------------------------")
+    print("1st", end='  ')
+    for second in nucleotides:
+        print(f'  {second}', end='     ')
+    print("3rd")
+
+    for first in nucleotides:
+        for third in nucleotides:
+            print(first, end='   ')
+            for second in nucleotides:
+                codon = first + second + third
+                print(f'{codon}={codon_counts[codon]:>3}', end=' ')
+            print(' ' + third)
+        print()
 
 if __name__ == '__main__':
     import sys
