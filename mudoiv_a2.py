@@ -150,7 +150,6 @@ def processInquiry(config, sequences):
     selected_seqs = [int(ind) for ind in config['SelectedSeqs'].split(',')]
     start_position = int(config['SeqFragmentStartPosition'])
     end_position = int(config['SeqFragmentEndPostion'])
-    # get the fragment based on the positions in config file
     total_seqs = len(sequences)
     selected_seqs = [ind for ind in selected_seqs if 1 <= ind <= total_seqs]
 
@@ -162,28 +161,10 @@ def processInquiry(config, sequences):
     print(f"You have selected {selected_seqs} for the inquiry mode.")
     print(f"The start and end positions for sequence fragments: {start_position}-{end_position}\n")
 
-    # print out the message for user
-
     for ind in selected_seqs:
         seq_name, description, sequence = sequences[ind - 1]
-
-        # get the fragment
         selected_fragment = sequence[start_position - 1:end_position]
-
         printSeqFragment(seq_name, description, selected_fragment, start_position, end_position)
-
-        count = nucleotideCounter(sequence)
-        print(
-            f"Nucleotide Counts: Seq Length={count[0]} A={count[1]} T={count[2]} G={count[3]} C={count[4]} N={count[5]}")
-
-        # print gc content
-        print(f"GC content={gcContent(sequence)}%")
-
-        # print dinucleotide profile
-        print(f"Dinucleotide profile: {diNucleotideProfile(sequence)}")
-
-        # print cpg islands
-        print(f"CpG Islands: {CpGIsland(sequence)}")
 
         if config['translation6Frame'] == 'Y':
             translations = translation6Frame(selected_fragment)
@@ -194,7 +175,15 @@ def processInquiry(config, sequences):
                 print(f"{direction} Frame {frame}: {trans}")
             print()
 
-        print()
+        else:
+            count = nucleotideCounter(sequence)
+            print(f"Nucleotide Counts: Seq Length={count[0]} A={count[1]} T={count[2]} G={count[3]} C={count[4]} N={count[5]}")
+            print(f"GC content={gcContent(sequence)}%")
+            print(f"Dinucleotide profile: {diNucleotideProfile(sequence)}")
+            print(f"CpG Islands: {CpGIsland(sequence)}")
+            print()
+
+    print()
 
 def codonProfile(sequence):
     # Initialize a dictionary with 64 codons as keys and values set to 0
