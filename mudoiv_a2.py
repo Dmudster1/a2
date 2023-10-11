@@ -429,3 +429,35 @@ if __name__ == '__main__':
 
     processInquiry(config, sequences)
     # run the inquiry mode
+
+    # Gene Expression Analysis
+    if config.get('geneExp') == 'Y':
+        dict_lung, dict_prostate = getExpression(config['GeneExpFileName'])
+
+        # Print the results for lung and prostate
+        print("Gene Expression Analysis for Lung:")
+        for gene, value in dict_lung.items():
+            print(f"{gene}: {value}")
+
+        print("\nGene Expression Analysis for Prostate:")
+        for gene, value in dict_prostate.items():
+            print(f"{gene}: {value}")
+
+        # Compare genes
+        genes_both, genes_only_lung, genes_only_prostate, genes_neither = geneCompare(dict_lung, dict_prostate)
+
+        print("\n[3.1] Genes expressed in both lung and prostate cancer:")
+        for gene in genes_both:
+            print(gene)
+
+        print("\n[3.2] Genes expressed only in lung cancer:")
+        for gene in genes_only_lung:
+            print(gene)
+
+        print("\n[3.3] Genes expressed only in prostate cancer:")
+        for gene in genes_only_prostate:
+            print(gene)
+
+        print("\n[3.4] Genes expressed in neither lung nor prostate cancer:")
+        for gene in genes_neither:
+            print(gene)
