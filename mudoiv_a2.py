@@ -269,22 +269,120 @@ def translation6Frame(dna_seq):
 def printSeqFragment(seq_name, description, seq_fragment, start, end):
     # Print sequence name and description
     print(f'>{seq_name} {description}')
+    print(f'The selected fragment has a length of {len(seq_fragment)} nucleotides:')
 
-    # Print the length of the selected fragment
-    fragment_length = len(seq_fragment)
-    print(f'The selected fragment has a length of {fragment_length} nucleotides:')
+    # Calculate the width of the box based on the sequence fragment length
+    box_width = max(len(seq_name + description), len(seq_fragment) + 2, 40) + 4  # +4 for padding
 
-    # Format the ruler to show the start and end positions
-    ruler = f'<{start}' + '-' * (fragment_length - len(str(start)) - len(str(end))) + f'{end}>'
-    print(ruler)
+    # Print the top border of the box
+    print('+' + '-' * box_width + '+')
 
-    # Display the sequence fragment with ellipsis in the middle if too long
-    if fragment_length > 40:
-        print(seq_fragment[:20] + '...' + seq_fragment[-20:])
-    else:
-        print(seq_fragment)
+    # Get the 6-frame translations
+    translations = translation6Frame(seq_fragment)
 
+    # Print the 6-frame translations in the desired format with padding
+    for trans in translations:
+        print('| ' + ' '.join(list(trans)).ljust(box_width) + ' |')
+    print('|'.ljust(box_width + 2) + '|')
+
+    # Display the sequence fragment with a ruler with padding
+    ruler = f'<{start}' + '-' * (len(seq_fragment) - len(str(start)) - len(str(end))) + f'{end}>'
+    print('| ' + ruler.ljust(box_width) + ' |')
+    print('| ' + ('|' * len(seq_fragment)).ljust(box_width) + ' |')
+    print('| ' + seq_fragment.ljust(box_width) + ' |')
+
+    # Display the reverse complement of the sequence fragment with padding
+    reverse_complement = ''.join(
+        [{'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}.get(base, base) for base in reversed(seq_fragment)])
+    print('| ' + ('|' * len(seq_fragment)).ljust(box_width) + ' |')
+    print('| ' + reverse_complement.ljust(box_width) + ' |')
+
+    # Print the bottom border of the box
+    print('+' + '-' * box_width + '+')
     print()
+
+def read_gene_expression_data(filename):
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+    # Extract header and data
+    header = lines[0].strip().split('\t')
+    data = [line.strip().split('\t') for line in lines[1:]]
+
+    # Convert data to dictionary format for easier processing
+    gene_data = {}
+    for entry in data:
+        gene_id = entry[0]
+        num_c = int(entry[1])
+        num_l = int(entry[2])
+        num_p = int(entry[3])
+        gene_data[gene_id] = {'NumC': num_c, 'NumL': num_l, 'NumP': num_p}
+
+    return gene_data
+
+def calculate_expression_ratios(gene_data):
+    for gene_id, data in gene_data.items():
+        # Calculate NumL/NumC ratio
+        if data['NumC'] == 0:
+            data['L:C'] = '*'
+        else:
+            ratio_lc = data['NumL'] / data['NumC']
+            if ratio_lc >= 1.5:
+                data['L:C'] = '+'
+            elif ratio_lc <= 0.667:
+                data['L:C'] = '-'
+            else:
+                data['L:C'] = '.'
+
+        # Calculate NumP/NumC ratio
+        if data['NumC'] == 0:
+            data['P:C'] = '*'
+        else:
+            ratio_pc = data['NumP'] / data['NumC']
+            if ratio_pc >= 1.5:
+                data['P:C'] = '+'
+            elif ratio_pc <= 0.667:
+                data['P:C'] = '-'
+            else:
+                data['P:C'] = '.'
+
+    return gene_data
+
+def getExpression(filename):
+    gene_data = read_gene_expression_data(filename)
+    expression_data = calculate_expression_ratios(gene_data)
+
+    dict_lung = {}
+    dict_prostate = {}
+
+    for gene_id, data in expression_data.items():
+        dict_lung[gene_id] = f"{data['NumL']}:{data['NumC']}:{data['L:C']}"
+        dict_prostate[gene_id] = f"{data['NumP']}:{data['NumC']}:{data['P:C']}"
+
+    return dict_lung, dict_prostate
+
+
+def geneCompare(dict_lung, dict_prostate):
+    # Genes expressed in lung cancer tissues
+    genes_lung = {gene for gene, value in dict_lung.items() if value.split(':')[1] != '0'}
+
+    # Genes expressed in prostate cancer tissues
+    genes_prostate = {gene for gene, value in dict_prostate.items() if value.split(':')[1] != '0'}
+
+    # Genes expressed in both lung and prostate cancer tissues
+    genes_both = genes_lung.intersection(genes_prostate)
+
+    # Genes expressed only in lung cancer tissues
+    genes_only_lung = genes_lung.difference(genes_prostate)
+
+    # Genes expressed only in prostate cancer tissues
+    genes_only_prostate = genes_prostate.difference(genes_lung)
+
+    # Genes expressed in neither lung nor prostate cancer tissues
+    genes_neither = set(dict_lung.keys()).difference(genes_lung).difference(genes_prostate)
+
+    return genes_both, genes_only_lung, genes_only_prostate, genes_neither
+
 
 if __name__ == '__main__':
     import sys
